@@ -65,9 +65,9 @@ void setup() {
   if(digitalRead(dip1)==1){
     direc=1; //esquerda
   }else{
-    direc=0; //direita
+    direc=0; //sireita
   }
-  delay(4900);  
+  delay(4800);  
   mpu.update();
   //Valores iniciais do sensor
   yInicial = mpu.getAngleY();
@@ -88,15 +88,13 @@ void loop() {
   valorSensor2 = analogRead(linha2);
   float yAtual = mpu.getAngleY();
   
- /*Serial.println(yInicial);
- if(yAtual < (yInicial - 1.5) ){
-    direita(150, 80);
-    delay(80);
-    tras(200, 200);
-    delay(100);
+ if(abs(yInicial - yAtual) > 3){
+  Serial.println("Entrou");
+   fugaAdversario();
  }
- */ 
+ 
 //segue adversário
+//rever, provavelmente vai bugar
   if(sharp1 < 800 || sharp2 < 800){
     frente(150, 150);
     if(sharp1 < sharp2){
@@ -199,3 +197,8 @@ void drift(){
   }
   direc = !direc;
 }
+
+void fugaAdversario(){
+  tras(200, 100);
+  delay(250);
+  }
