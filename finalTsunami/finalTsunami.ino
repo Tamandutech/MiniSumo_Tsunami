@@ -65,7 +65,7 @@ void setup() {
   if(digitalRead(dip1)==1){
     direc=1; //esquerda
   }else{
-    direc=0; //sireita
+    direc=0; //direita
   }
   delay(4900);  
   mpu.update();
@@ -94,12 +94,9 @@ void loop() {
     delay(80);
     tras(200, 200);
     delay(100);
-   Serial.println("Levantado");
-   Serial.println(yAtual);
  }
  */ 
 //segue adversário
-//rever, provavelmente vai bugar
   if(sharp1 < 800 || sharp2 < 800){
     frente(150, 150);
     if(sharp1 < sharp2){
