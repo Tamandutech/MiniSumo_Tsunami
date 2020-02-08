@@ -11,23 +11,21 @@ void setup() {
   mpu.update(); 
   yInicial = mpu.getAngleY();
 }
-
+ float mediaV = 0;
+ float contV = 0;
+ float media = 0;
+ float cont = 0;
+ int i = 0;
 void loop() {
 
   
   mpu.update();
   float yAtual = mpu.getAngleY();
-  if(yAtual < (yInicial - 1)){
-    Serial.println("Levantado");
-    }else{Serial.println("Ta no chão");}
-  
- /* //Serial.print("angleX : ");
-  //Serial.println(mpu.getAngleX());
-  Serial.print("\tangleY : ");
-  Serial.println(mpu.getAngleY());
-  //Serial.print("\tangleZ : ");
-  //Serial.println(mpu.getAngleZ());
-  */
+ if(abs(yInicial - yAtual) > 3){
+  Serial.println("levantado");
+  }else{Serial.println("não");}
+ //Serial.print("\tangleY : ");
+ //Serial.println(mpu.getAngleY());
 
   
 }
