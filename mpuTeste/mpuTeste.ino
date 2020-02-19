@@ -1,44 +1,30 @@
 //Y >tras <frente
 #include <MPU6050_tockn.h>
 #include <Wire.h>
+#include <LinkedList.h>
+#include <Gaussian.h>
+#include <GaussianAverage.h>
 
 MPU6050 mpu6050(Wire);
 
+GaussianAverage angleY(10);
+
 float inicialY;
-float atualY = 0;
-int tras=0,frent=0;
 
 void setup() {
   Serial.begin(9600);
   Wire.begin();
   mpu6050.begin();
   mpu6050.calcGyroOffsets(true);
-  mpu6050.update();
-  inicialY = mpu6050.getAngleY(); //pega angulação inicial em Y
-  Serial.println(inicialY);
+  inicialY = 4.10;
 }
 
 void loop() {
   mpu6050.update(); //atualiza mpu
-  float atualY = mpu6050.getAngleY(); //pega nova angulação de Y
-  Serial.print(atualY);
-  if(atualY > inicialY+4){
-    tras++;
-  }else if(atualY < inicialY-4){
-    frent++;
-  }else{
-    tras=0;
-    frent=0;
-  }
-  if(tras>10){
-    Serial.println("Traseira levantada+++++++++++");
-    tras=0;
-    frent=0;
-  }
-  else if(frent>10){
-    Serial.println("Frente levantada-------------");
-    tras=0;
-    frent=0;
-  }
-  else Serial.println("");
+  angleY += mpu6050.getAngleY();
+  angleY.process();
+  Serial.print(angleY.mean);
+  if(angleY.mean>inicialY+3) Serial.print(" - TRAAAAAAAAAAS   ");
+  else if(angleY.mean<inicialY-3) Serial.print(" - FRENTEEEEEEEE   ");
+  Serial.println();
 }
