@@ -1,24 +1,26 @@
+#include <BluetoothSerial.h>
+#include <LinkedList.h>
+#include <Gaussian.h>
+#include <GaussianAverage.h>
 #include <analogWrite.h>
 #include <MPU6050_tockn.h>
 #include <Wire.h>
-#include <SharpDistSensor.h>
+
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
+BluetoothSerial SerialBT;
+
+char BT = 1231242;
+int tempo = 4900;
+int modo = 1;
+
 MPU6050 mpu(Wire);
-const byte sharpF = 12;
-const byte sharpT = 13;
-const byte medianFilterWindowSize = 5;
-SharpDistSensor if1(sharpF, medianFilterWindowSize);
-SharpDistSensor if2(sharpT, medianFilterWindowSize);
+  #define sharpF 12
+  #define sharpE 13
+  #define sharpD 14
 
-  //#define sharpF 12
-  //#define sharpT 13
-
-  #define dip1 33
-  #define dip2 32
-  #define dip3 35
-  #define dip4 34
-
-  #define button 36
-  
   #define pwmB 23
   #define b1 5
   #define b2 1
@@ -29,9 +31,6 @@ SharpDistSensor if2(sharpT, medianFilterWindowSize);
   //sensor de linha
   #define linha1 2
   #define linha2 4
-  //sharp
-  int valorSensor1 = 0;
-  int valorSensor2 = 0;
   //acelerometro
   float yInicial = 0;
   //potencia
@@ -50,90 +49,44 @@ void setup() {
   pinMode(linha1, INPUT);
   pinMode(linha2, INPUT);
   pinMode(sharpF, INPUT);
-  pinMode(sharpT, INPUT);
-  pinMode(button, INPUT_PULLUP);
-  pinMode(dip1,INPUT);
-  pinMode(dip2,INPUT);
-  pinMode(dip3,INPUT);
-  pinMode(dip4,INPUT);
+  pinMode(sharpE, INPUT);
+  pinMode(sharpD, INPUT);
   digitalWrite(stby,1);
+  SerialBT.begin("Tsunami"); //Bluetooth device name
   Serial.begin(9600);
   Wire.begin();
   mpu.begin();
   mpu.calcGyroOffsets(true);
-  while(digitalRead(button)==1){}
-  if(digitalRead(dip1)==1){
-    direc=1; //esquerda
-  }else{
-    direc=0; //sireita
+  SerialBT.println("LIGOUUUU");
+  while(BT != 0){
+      if(SerialBT.available()) {
+          BT = SerialBT.read();
+          Serial.print(BT);
+      }
+      while(BT == 1234){
+          if(SerialBT.available()) tempo = SerialBT.read();
+          BT = modo;
+          SerialBT.println("Delay");
+      }if(BT != 1234){
+          modo = BT;  
+      }else if(BT == 4321){
+          SerialBT.println("Check");
+          SerialBT.print("Modo: ");
+          SerialBT.println(modo);
+          SerialBT.print("Delay: ");
+          SerialBT.println(tempo);  
+      }
   }
-  delay(4900);  
+  delay(tempo);
+  SerialBT.println("Start");
   mpu.update();
   //Valores iniciais do sensor
   yInicial = mpu.getAngleY();
- Serial.println(yInicial);
-  if(digitalRead(dip2)==1){
-    frente(200,255);
-    delay(500);
-  }
-  if(digitalRead(dip3)==1){
-    drift();  
-  }
 }
- float media = 0;
- float cont = 0;
- int i = 0;
+ 
 void loop() {
-  mpu.update();
-  unsigned int sharp1 = if1.getDist();
-  unsigned int sharp2 = if2.getDist();
-  valorSensor1 = analogRead(linha1);
-  valorSensor2 = analogRead(linha2);
-  float yAtual = mpu.getAngleY();
- 
-  
- if(abs(yInicial - yAtual) > 3){
-    fugaAdversario();
- }
- 
-//segue adversário
-  /*if(sharp1 < 800 || sharp2 < 800){
-    frente(150, 150);
-    if(sharp1 < sharp2){
-      frente(220, 200);
-    }else{
-      frente(200, 220);
-    }
-  }else if(direc==1){
-    esquerda(a, b);
-  }else{
-    direita(a,b);  
-  }*/
 
-  /*if(valorSensor2 < 1000 || valorSensor2 < 1000){
-   fugaLinha();
-  }*/
-  
-  /*Giroscopio: utilizar angulo y(rampado ou não) e z(pegou de lado)
-  Serial.print("angleX : ");
-  Serial.print(mpu.getAngleX());
-  Serial.print("\tangleY : ");
-  Serial.print(mpu.getAngleY());
-  Serial.print("\tangleZ : ");
-  Serial.println(mpu.getAngleZ());
-  
-  //Acelerometro: accY e accX variando de -0.2 a -0.5 quando parado
-  xAccInicial = mpu.getAccX(); 
-  yAccInicial = mpu.getAccY();
-  Serial.print("x atual: ");
-  Serial.println(xAccInicial);
-  Serial.print("y atual");
-  Serial.println(yAccInicial);
-  */
 }
-
-
-
 
 void tras(int pa, int pb){
   digitalWrite(b1,1);
@@ -167,22 +120,6 @@ void esquerda(int pa, int pb){
   analogWrite(pwmB, pb);
   analogWrite(pwmA, pa);
   }
-
-  
-void fugaLinha(){
-  if(valorSensor1 > valorSensor2){
-      tras(250, 250);
-      delay(500);
-      esquerda(a, b);
-      delay(500);
-    }
-    else{
-      tras(250, 250);
-      delay(500);
-      direita(a, b);
-      delay(500);
-     }
-}
 
 void drift(){
   if(direc==1){
