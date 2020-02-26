@@ -4,6 +4,9 @@
 #include <GaussianAverage.h>
 #include <analogWrite.h>
 
+GaussianAverage averageLinhaE(10);
+GaussianAverage averageLinhaD(10);
+
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
@@ -194,7 +197,11 @@ void loop() {
     case '2': //girand
        //SerialBT.println("GIRANDI");
        while(true){
-       while(analogRead(linhaE)>1500 && analogRead(linhaD)>1500){
+       while(averageLinhaE.mean>1500 && averageLinhaD.mean>1500){
+          averageLinhaE += analogRead(linhaE);
+          averageLinhaE.process();
+          averageLinhaD += analogRead(linhaD);
+          averageLinhaD.process();
           while(analogRead(sharpF)>50){  //Se viu o oponente pela frente
               move('D','F',100);         //ataca
               move('E','F',100);     
