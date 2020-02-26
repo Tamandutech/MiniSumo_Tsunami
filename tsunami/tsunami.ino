@@ -20,6 +20,8 @@ int tempo = 4900;  //delay antes da lutra
 char estrategia = 'f';  //estratégio de início da luta (qualquer caracter)
 char lupi = '2';  //estratégia após início da luta (1 a 9)
 
+unsigned long tempoAgora = 0;
+
   #define sharpF 32
   #define sharpE 34
   #define sharpD 35
@@ -232,13 +234,19 @@ void loop() {
           move('D','F',100);
           move('E','T',100);
           direc = false;
-          delay(100);
+          tempoAgora = millis();
+          while(millis() < tempoAgora + 100){
+            if(analogRead(sharpF)>50) break;  
+          }
         }
         else if(analogRead(SharpD)>50){
           move('D','T',100);
           move('E','F',100);
           direc = true;
-          delay(100);
+          dtempoAgora = millis();
+          while(millis() < tempoAgora + 100){
+            if(analogRead(sharpF)>50) break;  
+          }
         }
         else{
           if (direc){
@@ -252,17 +260,20 @@ void loop() {
       }
       }
       move('D','T',100);            //-----------------------------
-       move('E','T',100);
-       delay(300);                   //
-       if (direc){
-              move('D','T',100);     //       Fuga da linha
-              move('E','F',100);
-          }else{
-              move('D','F',100);     //
-              move('E','T',100);
-          }
-          delay(120);                 //------------------------------
-       }
+      move('E','T',100);
+      delay(300);                   //
+      if (direc){
+        move('D','T',100);     //       Fuga da linha
+        move('E','F',100);
+      }else{
+        move('D','F',100);     //
+        move('E','T',100);
+      }
+        tempoAgora = millis();
+        while(millis() < tempoAgora + 120){
+          if(analogRead(sharpF)>50) break;  
+        }                       //------------------------------
+      }
       
       
     break;
@@ -282,15 +293,21 @@ void loop() {
           if(analogRead(sharpE)>100){   //Se viu o oponente por ultimo do lado esquerdo
               move('D','F',100);
               move('E','T',100);
-              delay(100);              //gira 90 graus pra ficar de frente para o oponente
               direc = false;           //a direção de giro passa a ser para a esquerda
               SerialBT.println("ESQUERDAAAAA"); 
+              tempoAgora = millis();
+              while(millis() < tempoAgora + 100){
+                if(analogRead(sharpF)>50) break;  
+              }                     //gira 90 graus pra ficar de frente para o oponente
           }else if(analogRead(sharpD)>100){  //Se viu o oponente por ultimo do lado direito
               move('D','T',100);
               move('E','F',100);
-              delay(100);                    //gira 90 graus pra ficar de frente para o oponente
               direc = true;                  //a direção de giro passa a ser para a direita
               SerialBT.println("DIREIIIIIITA");
+              tempoAgora = millis();
+              while(millis() < tempoAgora + 100){
+                if(analogRead(sharpF)>50) break;  
+              }                                         //gira 90 graus pra ficar de frente para o oponente
           }else {
             if (direc){           //Se não leu em nenhum sensor
               move('D','T',35);       //Gira
@@ -311,7 +328,10 @@ void loop() {
               move('D','F',100);     //
               move('E','T',100);
           }
-          delay(120);                 //------------------------------
+          tempoAgora = millis();
+          while(millis() < tempoAgora + 120){
+            if(analogRead(sharpF)>50) break;  
+          }                 //------------------------------
        }
     break;
       
