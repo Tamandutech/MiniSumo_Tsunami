@@ -10,10 +10,10 @@
 
 BluetoothSerial SerialBT;
 
-char BT = 'f';
-int tempo = 4900;
-char estrategia = 'f';
-char lupi = '2';
+char BT = 'f';   //caracter que é recebida pelo bluetooth
+int tempo = 4900;  //delay antes da lutra
+char estrategia = 'f';  //estratégio de início da luta (qualquer caracter)
+char lupi = '2';  //estratégia após início da luta (1 a 9)
 
   #define sharpF 32
   #define sharpE 34
@@ -30,7 +30,7 @@ char lupi = '2';
   #define linhaE 39
   #define linhaD 36
   
-  bool direc = true;
+  bool direc = true;  //Direção de de giro para qualquer estratégia TRUE=DIREITA FALSE=ESQUERDA
   
 void setup() {
   pinMode(pwmB, OUTPUT);
@@ -48,20 +48,20 @@ void setup() {
   digitalWrite(stby,1);
   SerialBT.begin("Tsunami"); //Bluetooth device name
   SerialBT.println("LIGOUUUU");
-  while(BT != '0'){
+  while(BT != '0'){    //Inicio quando bluetooth recebe o char '0'
       if(SerialBT.available()) {
           BT = SerialBT.read();
           Serial.print(BT);
       }
-      if(BT == '+'){
+      if(BT == '+'){    //aumentar delay
           tempo += 100;
-      }else if(BT == '-'){
+      }else if(BT == '-'){  //diminuir delay
           tempo -= 100; 
-      }else if(BT == '<'){
+      }else if(BT == '<'){  //definir para que lado será toda a progrmação
           direc = false;        
       }else if(BT == '>'){
           direc = true;        
-      }else if(BT == 'C'){
+      }else if(BT == 'C'){  //Char 'C' checa as estrategias 
           SerialBT.println("Check");
           SerialBT.print("Estrategia: ");
           SerialBT.println(estrategia);
@@ -75,10 +75,10 @@ void setup() {
       }else if(BT == '0') {
         break;
       }else {
-          if(!(BT == 13 || BT == 10 || (BT>48 && BT<58))){
+          if(!(BT == 13 || BT == 10 || (BT>48 && BT<58))){     //Se não for ENTER ou numero será estrategia
               estrategia = BT;
           }
-          if(BT>48 && BT<58){
+          if(BT>48 && BT<58){   // Se for de 1 a 9 altera a função de loop
             lupi = BT;
           }
       }
@@ -89,6 +89,7 @@ void setup() {
   //SerialBT.println(estrategia);
 
   switch (estrategia){
+  //Estas são estratégias para início de luta, são leitura de sensor nenhum, apenas um movimento inicial
     case 'a': //frentao
       move('D','F',100);
       move('E','F',100);
@@ -163,41 +164,41 @@ void loop() {
     case '2': //girand
        //SerialBT.println("GIRANDI");
        while(analogRead(linhaE)>1500 && analogRead(linhaD)>1500){
-          while(analogRead(sharpF)>50){
-              move('D','F',100);
+          while(analogRead(sharpF)>50){  //Se viu o oponente pela frente
+              move('D','F',100);         //ataca
               move('E','F',100);     
           }
-          if(analogRead(sharpE)>100){
+          if(analogRead(sharpE)>100){   //Se viu o oponente por ultimo do lado esquerdo
               move('D','F',100);
               move('E','T',100);
-              delay(100);
-              direc = false;
+              delay(100);              //gira 90 graus pra ficar de frente para o oponente
+              direc = false;           //a direção de giro passa a ser para a esquerda
               SerialBT.println("ESQUERDAAAAA"); 
-          }else if(analogRead(sharpD)>100){
+          }else if(analogRead(sharpD)>100){  //Se viu o oponente por ultimo do lado direito
               move('D','T',100);
               move('E','F',100);
-              delay(100);
-              direc = true; 
+              delay(100);                    //gira 90 graus pra ficar de frente para o oponente
+              direc = true;                  //a direção de giro passa a ser para a direita
               SerialBT.println("DIREIIIIIITA");
-          }else if (direc){
-              move('D','T',35);
+          }else if (direc){           //Se não leu em nenhum sensor
+              move('D','T',35);       //Gira
               move('E','F',35);
           }else{
               move('D','F',35);
               move('E','T',35);
           }
        }
-       move('D','T',100);
+       move('D','T',100);            //-----------------------------
        move('E','T',100);
-       delay(300);
+       delay(300);                   //
        if (direc){
-              move('D','T',100);
+              move('D','T',100);     //       Fuga da linha
               move('E','F',100);
           }else{
-              move('D','F',100);
+              move('D','F',100);     //
               move('E','T',100);
           }
-          delay(120);
+          delay(120);                 //------------------------------
     break;
       
     case '3': //suicide
