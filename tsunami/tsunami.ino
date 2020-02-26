@@ -214,7 +214,14 @@ void loop() {
   // Estratégias do meio da luta, como vai procurar o oponente
   switch(lupi){
     case '1': //parado até leitura
-      while(analogRead(sharpF)<50 && analogRead(sharpE)<50 && analogRead(sharpD)<50){
+
+      while(true){
+        while(averageLinhaE.mean>1500 && averageLinhaD.mean>1500){
+          averageLinhaE += analogRead(linhaE);
+          averageLinhaE.process();
+          averageLinhaD += analogRead(linhaD);
+          averageLinhaD.process();
+        while(analogRead(sharpF)<50 && analogRead(sharpE)<50 && analogRead(sharpD)<50){
       }
       while(true){
         while(analogRead(sharpF)>50){
@@ -243,6 +250,21 @@ void loop() {
           }
         }
       }
+      }
+      move('D','T',100);            //-----------------------------
+       move('E','T',100);
+       delay(300);                   //
+       if (direc){
+              move('D','T',100);     //       Fuga da linha
+              move('E','F',100);
+          }else{
+              move('D','F',100);     //
+              move('E','T',100);
+          }
+          delay(120);                 //------------------------------
+       }
+      
+      
     break;
     
     case '2': //girand
