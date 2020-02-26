@@ -1,3 +1,5 @@
+// delay(100) com os motores no talo gira 90º
+
 #include <BluetoothSerial.h>
 #include <LinkedList.h>
 #include <Gaussian.h>
@@ -13,7 +15,7 @@ GaussianAverage averageLinhaD(10);
 
 BluetoothSerial SerialBT;
 
-char BT = 'f';   //caracter que é recebida pelo bluetooth
+char BT = 'f';   //char que é recebida pelo bluetooth
 int tempo = 4900;  //delay antes da lutra
 char estrategia = 'f';  //estratégio de início da luta (qualquer caracter)
 char lupi = '2';  //estratégia após início da luta (1 a 9)
@@ -78,7 +80,7 @@ void setup() {
       }else if(BT == '0') {
         break;
       }else {
-          if(!(BT == 13 || BT == 10 || (BT>48 && BT<58))){     //Se não for ENTER ou numero será estrategia
+          if(!(BT == 13 || BT == 10 || (BT>48 && BT<58))){     //Se não for ENTER ou numero altera a estrategia inicial
               estrategia = BT;
           }
           if(BT>48 && BT<58){   // Se for de 1 a 9 altera a função de loop
@@ -92,7 +94,8 @@ void setup() {
   //SerialBT.println(estrategia);
 
   switch (estrategia){
-  //Estas são estratégias para início de luta, são leitura de sensor nenhum, apenas um movimento inicial
+  //Estas são estratégias para início de luta, sem leitura de sensor nenhum, apenas um movimento inicial
+  
     case 'a': //frentao
       move('D','F',100);
       move('E','F',100);
@@ -105,7 +108,7 @@ void setup() {
       if(direc){
         move('D','T',100);
         move('E','F',100);
-        delay(30);
+        delay(80);
         move('D','F',100);
         move('E','F',80);
         delay(2000);
@@ -113,31 +116,43 @@ void setup() {
       else{
         move('D','F',100);
         move('E','T',100);
-        delay(30);
+        delay(80);
         move('D','F',100);
         move('E','F',80);
         delay(2000);
       }
     break;
 
-     default:
-      move('D','F',100);
-      move('E','F',100);
-      delay(1000);
-      SerialBT.print("DEFAAAAAAULT");
-      break;
+    case 'c':   //curvinha
+      if(direc){
+        move('D','T',100);
+        move('E','F',100);
+        delay(90);
+        move('D','F',100);
+        move('E','F',40);
+        delay(800);
+      }
+      else{
+        move('D','F',100);
+        move('E','T',100);
+        delay(90);
+        move('D','F',100);
+        move('E','F',40);
+        delay(800);
+      }
+    break;
 
-    case 'c':  //babacas
+    case 'd':  //babacas
       if (direc){
         move('D','T',100);
         move('E','F',100);
         delay(50);
         move('D','F',100);
         move('E','F',100);
-        delay(300);
+        delay(250);
         move('D','F',100);
         move('E','T',100);
-        delay(150);
+        delay(120);
       }
       else {
         move('D','F',100);
@@ -145,23 +160,58 @@ void setup() {
         delay(50);
         move('D','F',100);
         move('E','F',100);
-        delay(300);
+        delay(250);
         move('D','T',100);
         move('E','F',100);
-        delay(150);
+        delay(120);
       }
       break;
 
-    //case 'd':  //costas
+    case 'e':  //costas   - só gira 180º
+      if (direc){  //prestar atenção na direc, pq os robôs estarão de costas
+        move('D','T',100);
+        move('E','F',100);
+        delay(185);
+      }
+      else{
+        move('D','F',100);
+        move('E','T',100);
+        delay(185);
+      }
+      
+    break;
 
-    //case 'e':  //costas curvao
-
+        
     case 'f': //vai direto pro loop
     break;
+
+    case 'g':  //costas curvao
+      if (direc){
+        move('D','F',50);
+        move('E','F',100);
+        delay(200);
+      }
+      else{
+        move('D','F',100);
+        move('E','F',50);
+        delay(200);
+      }
+      
+      
+    break;
+
+    default:        //CÓPIA DO FRENTÃO
+      move('D','F',100);
+      move('E','F',100);
+      delay(500);
+      SerialBT.print("DEFAAAAAAULT");
+     break;
   }
 }
  
 void loop() {
+
+  // Estratégias do meio da luta, como vai procurar o oponente
   switch(lupi){
     case '1': //parado até leitura
       while(analogRead(sharpF)<50 && analogRead(sharpE)<50 && analogRead(sharpD)<50){
@@ -194,6 +244,7 @@ void loop() {
         }
       }
     break;
+    
     case '2': //girand
        //SerialBT.println("GIRANDI");
        while(true){
