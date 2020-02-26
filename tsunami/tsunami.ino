@@ -160,9 +160,40 @@ void setup() {
  
 void loop() {
   switch(lupi){
-    //case '1': //parado até leitura
+    case '1': //parado até leitura
+      while(analogRead(sharpF)<50 && analogRead(sharpE)<50 && analogRead(sharpD)<50){
+      }
+      while(true){
+        while(analogRead(sharpF)>50){
+          move('D','F',100);
+          move('E','F',100);
+        }
+        if(analogRead(SharpE)>50){
+          move('D','F',100);
+          move('E','T',100);
+          direc = false;
+          delay(100);
+        }
+        else if(analogRead(SharpD)>50){
+          move('D','T',100);
+          move('E','F',100);
+          direc = true;
+          delay(100);
+        }
+        else{
+          if (direc){
+              move('D','T',35);
+              move('E','F',35);
+          }else{
+              move('D','F',35);
+              move('E','T',35);
+          }
+        }
+      }
+    break;
     case '2': //girand
        //SerialBT.println("GIRANDI");
+       while(true){
        while(analogRead(linhaE)>1500 && analogRead(linhaD)>1500){
           while(analogRead(sharpF)>50){  //Se viu o oponente pela frente
               move('D','F',100);         //ataca
@@ -180,12 +211,14 @@ void loop() {
               delay(100);                    //gira 90 graus pra ficar de frente para o oponente
               direc = true;                  //a direção de giro passa a ser para a direita
               SerialBT.println("DIREIIIIIITA");
-          }else if (direc){           //Se não leu em nenhum sensor
+          }else {
+            if (direc){           //Se não leu em nenhum sensor
               move('D','T',35);       //Gira
               move('E','F',35);
-          }else{
+            }else{
               move('D','F',35);
               move('E','T',35);
+            }
           }
        }
        move('D','T',100);            //-----------------------------
@@ -199,6 +232,7 @@ void loop() {
               move('E','T',100);
           }
           delay(120);                 //------------------------------
+       }
     break;
       
     case '3': //suicide
