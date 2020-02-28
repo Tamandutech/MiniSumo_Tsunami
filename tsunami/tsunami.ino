@@ -1,13 +1,7 @@
 // delay(100) com os motores no talo gira 90º
 
 #include <BluetoothSerial.h>
-#include <LinkedList.h>
-#include <Gaussian.h>
-#include <GaussianAverage.h>
 #include <analogWrite.h>
-
-GaussianAverage averageLinhaE(10);
-GaussianAverage averageLinhaD(10);
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -26,13 +20,13 @@ unsigned long tempoAgora = 0;
   #define sharpE 34
   #define sharpD 35
 
-  #define pwmB 18
-  #define b1 26
-  #define b2 19
+  #define pwmB 23
+  #define b1 1
+  #define b2 5
   #define stby 3
-  #define a1 5
-  #define a2 1
-  #define pwmA 23
+  #define a1 19
+  #define a2 26
+  #define pwmA 18
   //sensor de linha
   #define linhaE 39
   #define linhaD 36
@@ -68,7 +62,7 @@ void setup() {
           direc = false;        
       }else if(BT == '>'){
           direc = true;        
-      }else if(BT == 'C'){  //Char 'C' checa as estrategias 
+      }else if(BT == 'C'){      //Char 'C' checa as estrategias 
           SerialBT.println("Check");
           SerialBT.print("Estrategia: ");
           SerialBT.println(estrategia);
@@ -102,7 +96,7 @@ void setup() {
       move('D','F',100);
       move('E','F',100);
       SerialBT.print("FRENTAAO");
-      delay(500);
+      delay(300);
       
     break;
 
@@ -112,16 +106,24 @@ void setup() {
         move('E','F',100);
         delay(80);
         move('D','F',100);
-        move('E','F',80);
-        delay(2000);
+        move('E','F',35);
+        delay(500);
+        move('D','F',100);
+        move('E','T',100);
+        delay(100);
+        direc = false;
       }
       else{
         move('D','F',100);
         move('E','T',100);
         delay(80);
-        move('D','F',100);
-        move('E','F',80);
-        delay(2000);
+        move('D','F',45);
+        move('E','F',100);
+        delay(500);
+        move('D','T',100);
+        move('E','F',100);
+        delay(100);
+        direc = true;
       }
     break;
 
@@ -217,122 +219,128 @@ void loop() {
   switch(lupi){
     case '1': //parado até leitura
 
-      while(true){
-        while(averageLinhaE.mean>1500 && averageLinhaD.mean>1500){
-          averageLinhaE += analogRead(linhaE);
-          averageLinhaE.process();
-          averageLinhaD += analogRead(linhaD);
-          averageLinhaD.process();
-        while(analogRead(sharpF)<50 && analogRead(sharpE)<50 && analogRead(sharpD)<50){
-      }
-      while(true){
-        while(analogRead(sharpF)>50){
-          move('D','F',100);
-          move('E','F',100);
-        }
-        if(analogRead(SharpE)>50){
-          move('D','F',100);
-          move('E','T',100);
-          direc = false;
-          tempoAgora = millis();
-          while(millis() < tempoAgora + 100){
-            if(analogRead(sharpF)>50) break;  
-          }
-        }
-        else if(analogRead(SharpD)>50){
-          move('D','T',100);
-          move('E','F',100);
-          direc = true;
-          dtempoAgora = millis();
-          while(millis() < tempoAgora + 100){
-            if(analogRead(sharpF)>50) break;  
-          }
-        }
-        else{
-          if (direc){
-              move('D','T',35);
-              move('E','F',35);
-          }else{
-              move('D','F',35);
-              move('E','T',35);
-          }
-        }
-      }
-      }
-      move('D','T',100);            //-----------------------------
-      move('E','T',100);
-      delay(300);                   //
-      if (direc){
-        move('D','T',100);     //       Fuga da linha
-        move('E','F',100);
-      }else{
-        move('D','F',100);     //
-        move('E','T',100);
-      }
         tempoAgora = millis();
-        while(millis() < tempoAgora + 120){
-          if(analogRead(sharpF)>50) break;  
-        }                       //------------------------------
-      }
-      
-      
-    break;
-    
-    case '2': //girand
-       //SerialBT.println("GIRANDI");
-       while(true){
-       while(averageLinhaE.mean>1500 && averageLinhaD.mean>1500){
-          averageLinhaE += analogRead(linhaE);
-          averageLinhaE.process();
-          averageLinhaD += analogRead(linhaD);
-          averageLinhaD.process();
+        while(analogRead(sharpF)<100 && analogRead(sharpE)<200 && analogRead(sharpD)<200){
+          if(millis() < tempoAgora + 5000){
+            move('D','F',100);
+            move('D','F',100);
+            delay(100);
+            move('D','F',0);
+            move('D','F',0);
+            tempoAgora = millis();  
+          }
+        }
+        while(true){
+        while(analogRead(linhaE)>1500 && analogRead(linhaD)>1500){
           while(analogRead(sharpF)>50){  //Se viu o oponente pela frente
               move('D','F',100);         //ataca
               move('E','F',100);     
           }
-          if(analogRead(sharpE)>100){   //Se viu o oponente por ultimo do lado esquerdo
-              move('D','F',100);
-              move('E','T',100);
-              direc = false;           //a direção de giro passa a ser para a esquerda
-              SerialBT.println("ESQUERDAAAAA"); 
+          if(analogRead(sharpE)>200){   //Se viu o oponente por ultimo do lado esquerdo
+              /*move('D','F',40);
+              move('E','T',40);             //a direção de giro passa a ser para a esquerda
+              //SerialBT.println("ESQUERDAAAAA"); 
               tempoAgora = millis();
               while(millis() < tempoAgora + 100){
-                if(analogRead(sharpF)>50) break;  
-              }                     //gira 90 graus pra ficar de frente para o oponente
-          }else if(analogRead(sharpD)>100){  //Se viu o oponente por ultimo do lado direito
-              move('D','T',100);
-              move('E','F',100);
+                if(analogRead(sharpF)>50){
+                  move('D','F',100);         //ataca
+                  move('E','F',100);
+                  break;
+                }
+              }*/
+              direc = false;         //a direção de giro passa a ser para a esquerda
+          }else if(analogRead(sharpD)>200){  //Se viu o oponente por ultimo do lado direito
+              /*move('D','T',40);
+              move('E','F',40);
+              //SerialBT.println("DIREIIIIIITA");
+              tempoAgora = millis();
+              while(millis() < tempoAgora + 100){
+                if(analogRead(sharpF)>50){
+                  move('D','F',100);         //ataca
+                  move('E','F',100);
+                  break; 
+                }  
+              }*/                                    //gira 90 graus pra ficar de frente para o oponente
               direc = true;                  //a direção de giro passa a ser para a direita
-              SerialBT.println("DIREIIIIIITA");
-              tempoAgora = millis();
-              while(millis() < tempoAgora + 100){
-                if(analogRead(sharpF)>50) break;  
-              }                                         //gira 90 graus pra ficar de frente para o oponente
           }else {
-            if (direc){           //Se não leu em nenhum sensor
-              move('D','T',35);       //Gira
-              move('E','F',35);
+            if(direc){           //Se não leu em nenhum sensor
+              move('D','T',25);       //Gira
+              move('E','F',25);
             }else{
-              move('D','F',35);
-              move('E','T',35);
+              move('D','F',25);
+              move('E','T',25);
             }
           }
        }
        move('D','T',100);            //-----------------------------
        move('E','T',100);
-       delay(300);                   //
+       delay(500);                   //
        if (direc){
-              move('D','T',100);     //       Fuga da linha
-              move('E','F',100);
-          }else{
-              move('D','F',100);     //
+              move('D','F',100);     //       Fuga da linha
               move('E','T',100);
+          }else{
+              move('D','T',100);     //
+              move('E','F',100);
           }
-          tempoAgora = millis();
-          while(millis() < tempoAgora + 120){
-            if(analogRead(sharpF)>50) break;  
-          }                 //------------------------------
+       tempoAgora = millis();
+       while(millis() < tempoAgora + 100){
+        if(analogRead(sharpF)>50){
+          move('D','F',100);         //ataca
+          move('E','F',100);
+          break;
+         }  
+       }               //------------------------------
+    }
+    break;
+    
+    case '2': //girand
+       //SerialBT.println("GIRANDI");
+       while(true){
+       while(analogRead(linhaE)>1500 && analogRead(linhaD)>1500){
+          while(analogRead(sharpF)>50){  //Se viu o oponente pela frente
+              move('D','F',100);         //ataca
+              move('E','F',100);     
+          }
+          if(analogRead(sharpE)>200){   //Se viu o oponente por ultimo do lado esquerdo
+              move('D','F',100);
+              move('E','F',0);             //a direção de giro passa a ser para a esquerda
+              //SerialBT.println("ESQUERDAAAAA"); 
+              delay(300);
+              direc = false;         //a direção de giro passa a ser para a esquerda
+          }else if(analogRead(sharpD)>200){  //Se viu o oponente por ultimo do lado direito
+              move('D','F',0);
+              move('E','F',100);
+              delay(300);                                 //gira 90 graus pra ficar de frente para o oponente
+              direc = true;                  //a direção de giro passa a ser para a direita
+          }else {
+            if(direc){           //Se não leu em nenhum sensor
+              move('D','T',25);       //Gira
+              move('E','F',25);
+            }else{
+              move('D','F',25);
+              move('E','T',25);
+            }
+          }
        }
+       move('D','T',100);            //-----------------------------
+       move('E','T',100);
+       delay(500);                   //
+       if (direc){
+              move('D','F',100);     //       Fuga da linha
+              move('E','T',100);
+          }else{
+              move('D','T',100);     //
+              move('E','F',100);
+          }
+       tempoAgora = millis();
+       while(millis() < tempoAgora + 100){
+        if(analogRead(sharpF)>50){
+          move('D','F',100);         //ataca
+          move('E','F',100);
+          break;
+         }  
+       }               //------------------------------
+    }
     break;
       
     case '3': //suicide
@@ -370,12 +378,19 @@ void loop() {
       }
       break;
 
+      case '9':                                             //Faz nada PARAAAAAA
+        move('D','T',0);
+        move('E','T',0);
+        while(true){}
+      break;
+
       
-      default:
+      default:                                               //COPIAR ALGUM LOOP PRO DEFAULT
       SerialBT.println("DEFaaUUUuuLLllti");
       break;
+      
   }
-  /*if(SerialBT.available()){
+  /*if(SerialBT.available()){        //desligar motores
       BT = SerialBT.read();
       if(BT == 'S') digitalWrite(stby,0);
   }*/
